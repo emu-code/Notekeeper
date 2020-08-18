@@ -255,7 +255,7 @@ public class NoteActivity extends AppCompatActivity
             }
 
         } else {
-            saveNote();
+//            saveNote();
          }
         Log.d(TAG, "onPause");
     }
