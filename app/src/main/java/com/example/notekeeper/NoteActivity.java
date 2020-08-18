@@ -1,5 +1,6 @@
 package com.example.notekeeper;
 
+import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -19,8 +20,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.loader.app.LoaderManager;
-
 
 
 import com.example.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
@@ -86,15 +85,16 @@ public class NoteActivity extends AppCompatActivity
         mAdapterCourses.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinnerCourses.setAdapter(mAdapterCourses);
 
-        getSupportLoaderManager().initLoader(LOADER_NOTES,null,this);
+        getLoaderManager().initLoader(LOADER_COURSES,null,this);
         readDisplayStateValues();
         saveOriginalNoteValues();
+
 
         mTextNoteTitle = findViewById(R.id.text_note_title);
         mTextNoteText = findViewById(R.id.text_note_text);
 
         if (!mIsNewNote)
-             getSupportLoaderManager().initLoader(LOADER_NOTES,null,this);
+             getLoaderManager().initLoader(LOADER_NOTES,null,this);
          Log.d(TAG, "On Create");
 //        if (mNote != null) {
 //            displayNote();
@@ -255,7 +255,7 @@ public class NoteActivity extends AppCompatActivity
             }
 
         } else {
-//            saveNote();
+            saveNote();
          }
         Log.d(TAG, "onPause");
     }
@@ -292,9 +292,10 @@ public class NoteActivity extends AppCompatActivity
         intent.putExtra(Intent.EXTRA_TEXT, text);
         startActivity(intent);
     }
-    @NonNull
+
+
     @Override
-    public androidx.loader.content.Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader loader = null;
         if (id == LOADER_NOTES)
             loader = createLoaderNotes();
@@ -302,6 +303,7 @@ public class NoteActivity extends AppCompatActivity
             loader = createLoaderCourses();
         return loader ;
     }
+
     private CursorLoader createLoaderCourses() {
         mCoursesQueryFinished = false;
         return new CursorLoader(this){
@@ -341,8 +343,9 @@ public class NoteActivity extends AppCompatActivity
             }
         };
     }
+
     @Override
-    public void onLoadFinished(@NonNull androidx.loader.content.Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (loader.getId() == LOADER_NOTES)
             loadFinishedNotes(data);
         else if (loader.getId() == LOADER_COURSES ){
@@ -351,7 +354,6 @@ public class NoteActivity extends AppCompatActivity
             displayNoteWhenQueriesFinished();
         }
     }
-
     private void loadFinishedNotes(Cursor data) {
         mNoteCursor = data;
         mCourseIdPos = mNoteCursor.getColumnIndex(NoteInfoEntry.COLUMN_COURSE_ID);
@@ -369,7 +371,7 @@ public class NoteActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLoaderReset(@NonNull androidx.loader.content.Loader<Cursor> loader) {
+    public void onLoaderReset(Loader<Cursor> loader) {
         if (loader.getId() == LOADER_NOTES) {
             if (mNoteCursor != null)
                 mNoteCursor.close();
@@ -378,6 +380,14 @@ public class NoteActivity extends AppCompatActivity
         }
     }
 
-
-
 }
+//    @NonNull
+//    @Override
+//    public androidx.loader.content.Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+//        CursorLoader loader = null;
+//        if (id == LOADER_NOTES)
+//            loader = createLoaderNotes();
+//        else if (id == LOADER_COURSES)
+//            loader = createLoaderCourses();
+//        return loader ;
+//    }
